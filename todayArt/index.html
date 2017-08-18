@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+  <head>
+    <meta charset="utf-8">
+    <title>今日の芸術作品</title>
+    <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1" />
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" type="text/css" href="assets/css/slick.css"/>
+    <link rel="stylesheet" href="assets/css/slick-theme.css">
+    <!-- Angular -->
+    <script src="assets/js/lib/angular.min.js"></script>
+    <script src="assets/js/controller.js"></script>
+  </head>
+  <body>
+
+    <header>
+        <a href="index.html"><img src="assets/img/logo.png" alt="noImage"></a>
+    </header>
+
+    <div id="slideshow">
+        <ul class="slideBox pc">
+          <li><a href="pages/4.html"><img src="assets/img/carousel01.jpg" alt="noImage"></a></li>
+          <li><a href="pages/11.html"><img src="assets/img/carousel02.jpg" alt="noImage"></a></li>
+          <li><a href="pages/45.html"><img src="assets/img/carousel03.jpg" alt="noImage"></a></li>
+          <li><a href="pages/58.html"><img src="assets/img/carousel04.jpg" alt="noImage"></a></li>
+        </ul>
+        <ul class="slideBox sp">
+          <li><a href="pages/4.html"><img src="assets/img/carousel01_sp.jpg" alt="noImage"></a></li>
+          <li><a href="pages/11.html"><img src="assets/img/carousel02_sp.jpg" alt="noImage"></a></li>
+          <li><a href="pages/45.html"><img src="assets/img/carousel03_sp.jpg" alt="noImage"></a></li>
+          <li><a href="pages/58.html"><img src="assets/img/carousel04_sp.jpg" alt="noImage"></a></li>
+        </ul>
+    </div>
+
+    <div id="main">
+
+      <div class="tabs">
+        <ul>
+          <li><a class="new selected" href=".contents_new">記事一覧</a></li>
+          <li><a class="digital" href=".contents_digital">デジタル</a></li>
+          <li><a class="idea" href=".contents_idea">アイデア</a></li>
+          <li><a class="minimal" href=".contents_minimal">ミニマル</a></li>
+        </ul>
+      </div>
+      <div class="contents">
+        <div class="contents_new">
+          <div class="title">
+            <img src="assets/img/new.png">
+          </div>
+          <div class="articleList" ng-controller = "MyController">
+            <articles class="article" ng-repeat="item in data">
+              <a href="pages/{{item.ID}}.html">
+                <span class="category">{{item.tag}}</span>
+                <img src="assets/img/works/{{item.image}}" alt="noImage" width="260px" height="146px">
+                <h1>{{item.artist}}</h1>
+                <time>{{item.date}}</time>
+              </a>
+        		</articles>
+          </div>
+        </div>
+        <div class="contents_digital">
+          <div class="title">
+            <img src="assets/img/digital.png">
+          </div>
+          <div class="articleList" ng-controller = "MyController">
+            <articles class="article" ng-repeat= "item in data | filter : { tag: 'digital' }">
+              <a href="pages/{{item.ID}}.html">
+                <span class="category">{{item.tag}}</span>
+                <img src="assets/img/works/{{item.image}}" alt="noImage" width="260px" height="146px">
+                <h1>{{item.artist}}</h1>
+                <time>{{item.date}}</time>
+              </a>
+            </articles>
+          </div>
+        </div>
+        <div class="contents_idea">
+          <div class="title">
+            <img src="assets/img/idea.png">
+          </div>
+          <div class="articleList" ng-controller = "MyController">
+            <articles class="article" ng-repeat= "item in data | filter : { tag: 'idea' }">
+              <a href="pages/{{item.ID}}.html">
+                <span class="category">{{item.tag}}</span>
+                <img src="assets/img/works/{{item.image}}" alt="noImage" width="260px" height="146px">
+                <h1>{{item.artist}}</h1>
+                <time>{{item.date}}</time>
+              </a>
+            </articles>
+          </div>
+        </div>
+        <div class="contents_minimal">
+          <div class="title">
+            <img src="assets/img/minimal.png">
+          </div>
+          <div class="articleList" ng-controller = "MyController">
+            <articles class="article" ng-repeat= "item in data | filter : { tag: 'minimal' }">
+              <a href="pages/{{item.ID}}.html">
+                <span class="category">{{item.tag}}</span>
+                <img src="assets/img/works/{{item.image}}" alt="noImage" width="260px" height="146px">
+                <h1>{{item.artist}}</h1>
+                <time>{{item.date}}</time>
+              </a>
+            </articles>
+          </div>
+        </div>
+      </div>
+      <div class="btn">
+      </div>
+
+    </div>
+
+    <footer>
+    </footer>
+
+  <!-- jQuery -->
+  <script src="assets/js/lib/jquery-3.2.1.min.js"></script>
+  <!-- slideshow -->
+  <script src="assets/js/lib/slick.js"></script>
+  <script src="assets/js/main.js"></script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--
+
+こんなところまでご高覧頂きありがとうございます。
+
+このwebサイトにはナイトモードを超えた
+
+「一寸先は闇モード」を搭載しております。
+
+「一寸先は闇モード」とは、一寸先は闇になるモードです。
+
+shift + ↑　で「一寸先は闇モード」になります。
+
+「一寸先は闇モード」はページを移動または更新して頂ければ解除されます。
+
+-->
