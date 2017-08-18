@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <title>microphone</title>
+  <script type="text/javascript" src=https://code.createjs.com/createjs-2015.11.26.min.js></script>
+  <style>
+    #myCanvas{
+      background-color: #eeeeee;
+    }
+  </style>
+</head>
+
+<body>
+  <p id="volume"></p>
+  <canvas id="myCanvas" width="465" height="465"></div>
+  <script src='js/polyfill.js'></script>
+  <script>
+
+    'use strict';
+
+    var ctx, analyser, frequencies, getByteFrequencyDataAverage, elVolume, draw;
+
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    ctx = new AudioContext();
+
+    analyser = ctx.createAnalyser();
+    frequencies = new Uint8Array(analyser.frequencyBinCount);
+
+    getByteFrequencyDataAverage = function() {
+        analyser.getByteFrequencyData(frequencies);
+        return frequencies.reduce(function(previous, current) {
+            return previous + current;
+        }) / analyser.frequencyBinCount;
+    };
+
+    navigator.mediaDevices.getUserMedia({audio: true})
+        .then(function(stream) {
+            window.hackForMozzila = stream;
+            ctx.createMediaStreamSource(stream)
+              // AnalyserNodeに接続
+              .connect(analyser);
+        })
+        .catch(function(err) {
+            console.log(err.message);
+        });
+
+    //-----------------------------//
+
+    var stage, particle;
+    var elvolume;
+
+    init();
+
+    function init(){
+      stage = new createjs.Stage("myCanvas");
+      particle = new createjs.Shape();
+      particle.graphics
+        .beginFill("#333")
+        .drawCircle(stage.canvas.width/2, stage.canvas.width/2, 100);
+      stage.addChild(particle);
+      createjs.Ticker.setFPS(60);
+      createjs.Ticker.addEventListener("tick", handleTick);
+      stage.update();
+    }
+
+    function handleTick(){
+      //音量を取得
+      elvolume = Math.floor(getByteFrequencyDataAverage());
+      //音量によって円の位置を変える
+      particle.y = elvolume;
+      stage.update();
+    }
+
+  </script>
+</body>
+</html>
