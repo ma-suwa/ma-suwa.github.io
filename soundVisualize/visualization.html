@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <title>microphone</title>
+  <script type="text/javascript" src=https://code.createjs.com/createjs-2015.11.26.min.js></script>
+  <style>
+    *{
+      margin: 0;
+    }
+    canvas#myCanvas {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #333333;
+    }
+  </style>
+</head>
+
+<body>
+  <p id="volume"></p>
+  <canvas id="myCanvas" width="465" height="465"></div>
+  <script src='js/polyfill.js'></script>
+  <script>
+
+    'use strict';
+
+    var ctx, analyser, frequencies, getByteFrequencyDataAverage, elVolume, draw;
+
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    ctx = new AudioContext();
+
+    analyser = ctx.createAnalyser();
+    frequencies = new Uint8Array(analyser.frequencyBinCount);
+
+    getByteFrequencyDataAverage = function() {
+        analyser.getByteFrequencyData(frequencies);
+        return frequencies.reduce(function(previous, current) {
+            return previous + current;
+        }) / analyser.frequencyBinCount;
+    };
+
+    navigator.mediaDevices.getUserMedia({audio: true})
+        .then(function(stream) {
+            window.hackForMozzila = stream;
+            ctx.createMediaStreamSource(stream)
+              // AnalyserNodeに接続
+              .connect(analyser);
+        })
+        .catch(function(err) {
+            console.log(err.message);
+        });
+
+    //-----------------------------//
+
+    var stage = new createjs.Stage("myCanvas");
+    var stageWidth = stage.canvas.width;
+    var stageHeight = stage.canvas.height;
+    var vx, vy;
+    var particle;
+    var particleList = [];
+    var size = 5;
+    var MAX_LIFE = 100;
+    var elvolume;
+
+    init();
+
+    function init(){
+      stage = new createjs.Stage("myCanvas");
+      createjs.Ticker.setFPS(60);
+      createjs.Ticker.addEventListener("tick", handleTick);
+      window.addEventListener("resize", handleResize);
+      stage.update();
+    }
+
+    handleResize();
+    //画面のリサイズ
+    function handleResize(event) {
+       var w = window.innerWidth;
+       var h = window.innerHeight;
+       stage.canvas.width = w;
+       stage.canvas.height = h;
+       stage.update();
+    }
+
+    function emitParticle(j,color,size){
+        particle = new createjs.Shape();
+        particle.graphics.beginFill(color).drawCircle(0, 0, size - Math.random());
+        stage.addChild(particle);
+        particle.x = stage.canvas.width/2 +  j*2 * Math.cos(360/256 * j) * Math.random() * Math.random();
+        particle.y = stage.canvas.height/2 + j*2 * Math.sin(360/256 * j) * Math.random() * Math.random();
+        particle.life = MAX_LIFE;
+        particle.vx = stage.canvas.width/25 * (Math.random() - 0.5);
+        particle.vy = stage.canvas.height/15 * (Math.random() - 0.5);
+        particle.compositeOperation = "lighter";
+        particleList.push(particle);
+    }
+
+    function handleTick(){
+      //音量を取得
+      elvolume = Math.floor(getByteFrequencyDataAverage());
+      var values = elvolume;
+      console.log(elvolume);
+      if(values > 20){
+        for(var i = 0; i< 4; i++){
+        emitParticle(values,"#F7D358",values*0.05);
+        }
+
+        emitParticle(values,"#F7D358",values*0.1);
+        emitParticle(values,"#F7D358",values*0.2);
+      }
+      for (var i = 0; i < particleList.length; i++) {
+        particleList[i].life -= 1;
+        particleList[i].vy += 1;
+        particleList[i].vx *= 0.99;
+        particleList[i].vy *= 0.96;
+        particleList[i].x += particleList[i].vx;
+        particleList[i].y += particleList[i].vy;
+        particleList[i].alpha = particleList[i].life / MAX_LIFE;
+
+        particleList[i].scaleX -= 0.01;
+        particleList[i].scaleY -= 0.01;
+        //パーティクルのサイズが0以下になったらそのまま0にする
+        if(particleList[i].scaleX <=0 || particleList[i].scaleY <= 0){
+          particleList[i].scaleX = 0;
+          particleList[i].scaleY = 0;
+        }
+        //跳ね返り
+        if (particleList[i].y > stage.canvas.height) {
+          particleList[i].y = stage.canvas.height; // 行き過ぎ補正
+          particleList[i].vy *= -1;
+        }
+        //ライフが0になったらパーティクル削除
+        if(particleList[i].life <= 0){
+          stage.removeChild(particleList[i]);
+          particleList.splice(i, 1);
+        }
+      }
+      stage.update();
+    }
+
+  </script>
+</body>
+</html>

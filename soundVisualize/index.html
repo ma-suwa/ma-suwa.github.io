@@ -24,14 +24,27 @@
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     ctx = new AudioContext();
 
+    //波形のデータを取得するもの
     analyser = ctx.createAnalyser();
+    //波形のデータの配列
     frequencies = new Uint8Array(analyser.frequencyBinCount);
 
+    //波形データの配列の個数
+    var bufferLength = analyser.frequencyBinCount;
+
+    console.log(bufferLength);
+
+    //音量を取得
     getByteFrequencyDataAverage = function() {
         analyser.getByteFrequencyData(frequencies);
-        return frequencies.reduce(function(previous, current) {
+
+        //1024個の配列に入ったデータの総数を取得
+        var frequenciesNum = frequencies.reduce(function(previous, current){
             return previous + current;
-        }) / analyser.frequencyBinCount;
+        });
+
+        //「波形のデータの平均値」 == 「音量」を取得
+        return frequenciesNum / analyser.frequencyBinCount;
     };
 
     navigator.mediaDevices.getUserMedia({audio: true})
@@ -48,27 +61,43 @@
     //-----------------------------//
 
     var stage, particle;
+    var particleList = [];
+    //音量
     var elvolume;
+    var value;
 
     init();
 
     function init(){
       stage = new createjs.Stage("myCanvas");
-      particle = new createjs.Shape();
-      particle.graphics
-        .beginFill("#333")
-        .drawCircle(stage.canvas.width/2, stage.canvas.width/2, 100);
-      stage.addChild(particle);
+
+      for (var i = 0; i < bufferLength; i++) {
+        drawParticle(i);
+      }
+
+      console.log(particleList[10]);
       createjs.Ticker.setFPS(60);
       createjs.Ticker.addEventListener("tick", handleTick);
       stage.update();
     }
 
+    function drawParticle(i){
+      particle = new createjs.Shape();
+      particle.graphics
+        .beginFill("#333")
+        .drawCircle(i, stage.canvas.height/2, stage.canvas.width/1024);
+      stage.addChild(particle);
+      particleList[i] = particle;
+    }
+
     function handleTick(){
+      for(var i = 0; i < bufferLength; i++ ){
+        particleList[i].y = -1*frequencies[i];
+      }
       //音量を取得
       elvolume = Math.floor(getByteFrequencyDataAverage());
       //音量によって円の位置を変える
-      particle.y = elvolume;
+
       stage.update();
     }
 
