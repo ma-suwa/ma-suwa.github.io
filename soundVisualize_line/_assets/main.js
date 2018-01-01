@@ -10,7 +10,8 @@
 	var centerY = window.innerHeight/2;   // variables to hold the center point, so that tick is quicker
 	var messageField;       // Message display field
 
-	var src = "audio/sound.mp3";  // set up our source
+	var assetsPath = "_assets/audio/";   // Create a single item to load.
+	var src = assetsPath + "sound.mp3";  // set up our source
 	var soundInstance;      // the sound instance we create
 	var analyserNode;       // the analyser node that allows us to visualize the audio
 	var freqFloatData, freqByteData, timeByteData;  // arrays to retrieve data from analyserNode
@@ -23,6 +24,11 @@
 	var bg,angle,radian,startX,startY,endX,endY;
 
 	function init() {
+		if (!createjs.Sound.registerPlugins([createjs.WebAudioPlugin])) {
+			console.log("ERROR");
+			return;
+		}
+
 		stage = new createjs.Stage("myCanvas");
 		//リサイズイベント
 		window.addEventListener("resize", handleResize);
@@ -31,7 +37,7 @@
 		createMessage();
 
 		createjs.Sound.on("fileload", handleLoad, this); // add an event listener for when load is completed
-		createjs.Sound.registerSound(src);  // register sound, which will preload automatically
+		createjs.Sound.registerSound(src,'sound');  // register sound, which will preload automatically
 		stage.update();
 	}
 
