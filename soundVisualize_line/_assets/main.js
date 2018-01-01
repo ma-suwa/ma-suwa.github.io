@@ -10,8 +10,7 @@
 	var centerY = window.innerHeight/2;   // variables to hold the center point, so that tick is quicker
 	var messageField;       // Message display field
 
-	var assetsPath = "/_assets/audio/";   // Create a single item to load.
-	var src = assetsPath + "sound.mp3";  // set up our source
+	var src = "audio/sound.mp3";  // set up our source
 	var soundInstance;      // the sound instance we create
 	var analyserNode;       // the analyser node that allows us to visualize the audio
 	var freqFloatData, freqByteData, timeByteData;  // arrays to retrieve data from analyserNode
