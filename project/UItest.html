@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>SoundJS: Sound Grid</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no"/>
+	<style>
+		*{
+			margin: 0;
+			padding: 0;
+
+		}
+		html{
+			font-size:62.5%; /* 10px */
+		}
+		body {
+			font-family: Arial;
+			background-color: #ececec;
+		}
+		canvas#myCanvas {
+		    display: block;
+		    position: absolute;
+		    top: 0;
+		    left: 0;
+		    width: 100%;
+		    height: 100%;
+		    background-color: #FFFFFF;
+		}
+
+		h3{
+			font-size: 2.4rem;
+			font-style: italic;
+			font-weight: bold;
+			letter-spacing : 0.1em ;
+		}
+		time{
+			font-size: 1.4rem;
+			font-style: italic;
+			font-weight: Bold;
+		}
+
+		#content {
+			width: 600px;
+			position: absolute;
+			right: 0px;
+		}
+
+		.gridBox {
+			/* margin: 0 auto; */
+			display: flex;
+		  align-items: center;
+			background-repeat: no-repeat;
+			background-position: 0 0px;
+			/* background-color: #FFF; */
+			margin-top: 5rem;
+			width: 600px;
+			height: 175px;
+
+		}
+
+		.gridBox:hover {
+			opacity: 0.5;
+			cursor: pointer;
+		}
+
+		.thumbnail{
+			width: 175px;
+			height: 175px;
+			margin-right: 3rem;
+			background: blue;
+		}
+
+		.caption h3{
+			margin-bottom: 1rem;
+		}
+
+	</style>
+
+</head>
+
+<body onload="init();">
+<div><canvas id="myCanvas" width="960" height="960"></canvas></div>
+<div id="content">
+	<div id="1" class="gridBox">
+		<div class="thumbnail dtm"></div>
+		<div class="caption">
+			<h3>DUMMY TEXT</h3>
+			<time>2018.05</time>
+		</div>
+	</div>
+	<div id="2" class="gridBox">
+		<div class="thumbnail dtm">a</div>
+		<div class="caption">
+			<h3>DUMMY TEXT</h3>
+			<time>2018.05</time>
+		</div>
+	</div>
+	<div id="3" class="gridBox">
+		<div class="thumbnail dtm"></div>
+		<div class="caption">
+			<h3>(remix)"Pathetique"2nd"</h3>
+			<time>2018.05</time>
+		</div>
+	</div>
+</div>
+<!--
+<div class="playArea">
+
+</div> -->
+
+<script src="https://code.createjs.com/createjs-2015.11.26.min.js"></script>
+
+<script id="editable">
+	var loadQueue
+	var preload;
+	var stage
+		var w,h;
+
+	function init() {
+		stage = new createjs.Stage("myCanvas");
+
+		preloadSound();
+		setAnalyser(64); //FFTSIZE
+		createMouseEvent();
+
+		var myContainer = new MyContainer();
+		stage.addChild(myContainer);
+
+		//リサイズイベント
+		window.addEventListener("resize", handleResize);
+		handleResize();
+
+		// Stageの描画を更新
+		stage.update();
+		createjs.Ticker.on('tick', stage); // 自動更新を有効にする
+		createjs.Ticker.timingMode = createjs.Ticker.RAF; // 滑らかに
+
+	}
+
+	class MyContainer extends createjs.Container {
+	constructor() {
+		super();
+
+		console.log(freqByteData.length);
+
+		// 多角形を作成します
+		for(var i = 0; i < freqByteData.length; i++){
+			var soundBar = new createjs.Shape();
+			soundBar.graphics.beginFill('DarkRed'); // 赤色で描画するように設定
+			soundBar.graphics.drawRect(0, 0, 20, 100); // 150pxの星を記述
+			soundBar.x = 40*i;
+			this.addChild(soundBar); // 表示リストに追加
+			// メンバーフィールドに保存
+			this.soundBar = soundBar;
+		}
+
+
+		// 更新イベントを定義
+		this.on('tick', this.update, this);
+	}
+	update() {
+		analyserNode.getFloatFrequencyData(freqFloatData);
+		analyserNode.getByteFrequencyData(freqByteData);
+		analyserNode.getByteTimeDomainData(timeByteData);
+		// // 多角形を作成します
+		for(var i = 0; i < freqByteData.length; i++){
+			this.soundBar.parent.children[i].y = h -300- freqByteData[i];
+		}
+		//console.log(this.soundBar.parent.children[0].y);
+
+	}
+}
+
+	//曲のローディング
+	function preloadSound(){
+		var queue = new createjs.LoadQueue(true);
+		queue.installPlugin(createjs.Sound);
+		var sounds = [
+			{src: "sound/sound_1.m4a", id: 1},
+			{src: "sound/sound_2.m4a", id: 2},
+			{src: "sound/sound_3.m4a", id: 3}
+		];
+		queue.loadManifest(sounds,true);
+		//全ての曲のファイルが読み込み終わったら発火
+		queue.addEventListener("complete", function(){
+			console.log("読み込み終了");
+		});
+		createjs.Sound.registerSounds(sounds);
+	}
+
+	//アナライザーの生成
+	function setAnalyser(FFTSIZE){
+		var context = createjs.Sound.activePlugin.context;
+		analyserNode = context.createAnalyser();
+		analyserNode.fftSize = FFTSIZE;
+		analyserNode.smoothingTimeConstant = 0.85;
+		analyserNode.connect(context.destination);
+		var dynamicsNode = createjs.Sound.activePlugin.dynamicsCompressorNode;
+		dynamicsNode.disconnect();
+		dynamicsNode.connect(analyserNode);
+		freqFloatData = new Float32Array(analyserNode.frequencyBinCount);
+		freqByteData = new Uint8Array(analyserNode.frequencyBinCount);
+		timeByteData = new Uint8Array(analyserNode.frequencyBinCount);
+	}
+
+	//gridBoxのマウスオーバーのイベントを設定
+	function createMouseEvent(){
+		var gridBox = document.querySelectorAll( ".gridBox" );
+		for(var i = 0; i < gridBox.length; i++){
+			gridBox[i].addEventListener('mouseenter', function(){
+				playSound(this);
+			});
+			gridBox[i].addEventListener('mouseleave', function(){
+				stop();
+			});
+		}
+	}
+
+	//再生
+	function playSound(target) {
+		var instance = createjs.Sound.play(target.id);
+		stage.removeEventListener("stagemousedown", playSound);
+		if (instance) {
+			return;
+		}
+	}
+
+	//停止
+	function stop() {
+		if (preload != null) {
+			preload.close();
+		}
+		createjs.Sound.stop();
+	}
+
+	function handleResize(){
+		w = window.innerWidth;
+		h = window.innerHeight;
+		stage.canvas.width = w;
+		stage.canvas.height = h;
+		centerX = w/2;
+		centerY = h/2;
+		stage.update();
+	}
+
+</script>
+<script src="http://code.jquery.com/jquery-3.2.1.min.js"></script>
+
+</body>
+</html>
